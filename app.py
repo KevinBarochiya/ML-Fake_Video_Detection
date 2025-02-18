@@ -35,7 +35,6 @@ def upload_video():
     
         frames = extract_frames(filepath)
         logger.info(f"{len(frames)} frames extracted")
-
         fake_prob = predict_deepfake(frames, ensemble_model)
         result = "FAKE" if fake_prob > 0.5 else "REAL"
         confidence = round(fake_prob * 100 if result == "FAKE" else (100 - fake_prob * 100), 2)
