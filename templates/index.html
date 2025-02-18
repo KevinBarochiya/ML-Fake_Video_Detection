@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detection</title>
+    <style>
+        :root {
+            --primary-color: #4267B2;
+            --hover-color: #365899;
+            --background-color: #f0f2f5;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --secondary-text: #65676B;
+            --border-radius: 10px;
+            --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .container {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .description {
+            color: var(--secondary-text);
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(66, 103, 178, 0.05);
+        }
+
+        input[type="file"] {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            position: absolute;
+            z-index: -1;
+        }
+
+        .file-label {
+            display: block;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .file-info {
+            font-size: 14px;
+            color: var(--secondary-text);
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--hover-color);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: left;
+            display: none;
+        }
+
+        .result-visible {
+            display: block !important;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+
+        .genuine {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .fake {
+            background-color: #F44336;
+            color: white;
+        }
+
+        .processing {
+            background-color: #FFC107;
+            color: white;
+        }
+
+        .result-details {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #F44336;
+            background-color: rgba(244, 67, 54, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <i>D</i>
+        </div>
+        <h1>Deepfake Video Detection</h1>
+        <p class="description">Upload a video file to check if it contains AI-generated or manipulated content. Our advanced algorithm will analyze the video and provide results with confidence scores.</p>
+        
+        <form id="upload-form" action="/uploads" method="post" enctype="multipart/form-data">
+            <div class="upload-area" id="drop-area">
+                <input type="file" id="file-input" name="file" accept=".mp4,.avi,.mov" required>
+                <label for="file-input" class="file-label">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p>Drag & drop your video file here or click to browse</p>
+                </label>
+                <p class="file-info">Supported formats: MP4, AVI, MOV (Max size: 100MB)</p>
+                <p id="file-name"></p>
+            </div>
+            <button type="submit">Analyze Video</button>
+        </form>
+        
+        <div id="result">
+            <!-- This will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // File selection feedback
+        const fileInput = document.getElementById('file-input');
+        const fileName = document.getElementById('file-name');
+        const dropArea = document.getElementById('drop-area');
+        
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileName.textContent = `Selected: ${fileInput.files[0].name}`;
+                fileName.style.fontWeight = 'bold';
+                fileName.style.color = '#4267B2';
+            } else {
+                fileName.textContent = '';
+            }
+        });
+        
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.style.borderColor = '#4267B2';
+            dropArea.style.backgroundColor = 'rgba(66, 103, 178, 0.05)';
+        }
+        
+        function unhighlight() {
+            dropArea.style.borderColor = '#ccc';
+            dropArea.style.backgroundColor = 'transparent';
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            if (fileInput.files.length > 0) {
+                fileName.textContent = `Selected: ${fileInput.files[0].name}`;
+                fileName.style.fontWeight = 'bold';
+                fileName.style.color = '#4267B2';
+            }
+        }
+        
+        // Form submission
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+    
+            const resultDiv = document.getElementById('result');
+    
+            if (fileInput.files.length === 0) {
+                resultDiv.innerHTML = '<p class="error">Please select a file!</p>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+    
+            resultDiv.innerHTML = `
+                <div class="result-header">
+                    <div class="result-icon processing">⋯</div>
+                    <h3>Processing your video...</h3>
+                </div>
+                <p>Please wait while we analyze the content. This may take a moment.</p>
+            `;
+            resultDiv.style.display = 'block';
+            resultDiv.classList.add('result-visible');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+    
+            try {
+                const response = await fetch('/uploads', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                const data = await response.json();
+                if (response.ok) {
+                    const isGenuine = data.result.toLowerCase().includes('genuine');
+                    const confidenceValue = parseFloat(data.confidence);
+                    
+                    resultDiv.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-icon ${isGenuine ? 'genuine' : 'fake'}">${isGenuine ? '✓' : '!'}</div>
+                            <h3>${data.result}</h3>
+                        </div>
+                        <p>${isGenuine ? 
+                            'This video appears to be authentic with no signs of manipulation.' : 
+                            'Our system has detected potential signs of manipulation in this video.'}
+                        </p>
+                        <div class="result-details">
+                            <p><strong>File:</strong> ${data.filename}</p>
+                            <p><strong>Confidence Score:</strong> ${data.confidence}</p>
+                            <div class="progress-bar">
+                                <div class="progress-value" style="width: ${confidenceValue}%"></div>
+                            </div>
+                            <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                                ${isGenuine ? 
+                                    'Our algorithm analyzed facial movements, lighting, and other visual cues to determine authenticity.' :
+                                    'The analysis found inconsistencies in facial expressions, unnatural blinking patterns, or other indicators of deepfake technology.'}
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-icon fake">×</div>
+                            <h3>Analysis Failed</h3>
+                        </div>
+                        <p class="error">${data.error || 'An error occurred during analysis. Please try again.'}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-icon fake">×</div>
+                        <h3>Error</h3>
+                    </div>
+                    <p class="error">Failed to upload or analyze the video. Please check your connection and try again.</p>
+                `;
+                console.error("Error:", error);
+            }
+        });
+    </script>    
+</body>
+</html>
