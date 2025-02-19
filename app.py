@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
+import pickle
 import os
 import logging
 from werkzeug.utils import secure_filename
@@ -8,6 +9,9 @@ from deepfake_detection import extract_frames, preprocess_frames, predict_deepfa
 
 app = Flask(__name__)
 CORS(app, resources={r"/uploads": {"origins": "*"}})
+
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
