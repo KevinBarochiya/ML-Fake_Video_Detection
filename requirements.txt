@@ -6,7 +6,7 @@ gunicorn
 torch
 torchvision
 torchaudio
-cv2
 timm
+opencv-python
 facenet_pytorch
 
