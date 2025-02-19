@@ -3,3 +3,10 @@ flask-cors
 numpy
 scikit-learn
 gunicorn
+torch
+torchvision
+torchaudio
+cv2
+timm
+facenet_pytorch
+
